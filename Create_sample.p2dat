@@ -1,0 +1,114 @@
+
+[rate=1e-3]               ;The variable "rate"  represents the unit "mm" in this code.
+domain extent [0.0*rate] [11.0*rate] [-1.0*rate] [1.5*rate]  condition periodic stop  
+set  random [random_seed] ;Set random seeds, different random seeds can result in different initial particle positions.
+
+[rad=1.5*rate/(2.0*a)]    ;The variable "rad" represents the particle radius in this code, which is determined by the normalized particle size.
+
+;===================================================================================
+geometry import  chi_lun_down.dxf        set chilun_down
+wall import geometry  chilun_down  id 1  group chilun_down
+geometry import  chi_lun_up.dxf          set chilun_up
+wall import geometry  chilun_up    id 2  group chilun_up
+
+geometry import  chi_lun1.dxf         set chilun1
+geometry import  chi_lun2.dxf         set chilun2
+geometry import  chi_lun3.dxf         set chilun3
+geometry import  chi_lun4.dxf         set chilun4
+geometry import  chi_lun5.dxf         set chilun5
+geometry import  chi_lun6.dxf         set chilun6
+geometry import  chi_lun7.dxf         set chilun7
+geometry import  chi_lun8.dxf         set chilun8
+geometry import  chi_lun9.dxf         set chilun9
+geometry import  chi_lun10.dxf        set chilun10
+geometry import  chi_lun11.dxf        set chilun11
+geometry import  chi_lun12.dxf        set chilun12
+geometry import  chi_lun13.dxf        set chilun13
+geometry import  chi_lun14.dxf        set chilun14
+geometry import  chi_lun15.dxf        set chilun15
+geometry import  chi_lun16.dxf        set chilun16
+geometry import  chi_lun17.dxf        set chilun17
+geometry import  chi_lun18.dxf        set chilun18
+geometry import  chi_lun19.dxf        set chilun19
+geometry import  chi_lun20.dxf        set chilun20
+geometry import  chi_lun21.dxf        set chilun21
+geometry import  chi_lun22.dxf        set chilun22
+;===================================================================================
+;The code from line 9 to line 35 is used to generate wall models (corrugated plates).
+
+ball distribute porosity    0.01                      ... ;Generate particles in the shear band.
+                resolution  1                         ...
+                radius      [rad] [rad]               ...
+                group       'shear_ball'              ...
+                range       x 0 [11.0*rate] y [0.0*rate] [1.5*rate]     
+
+
+ball delete range geometry  chilun_down  count odd
+ball delete range geometry  chilun_up    count odd
+
+;===================================================================================
+clump template create geometry  chilun1 surfcalc  bubblepack ratio 0.30 distance 140
+clump template create geometry  chilun2 surfcalc  bubblepack ratio 0.30 distance 140
+clump template create geometry  chilun3 surfcalc  bubblepack ratio 0.30 distance 140
+clump template create geometry  chilun4 surfcalc  bubblepack ratio 0.30 distance 140
+clump template create geometry  chilun5 surfcalc  bubblepack ratio 0.30 distance 140
+clump template create geometry  chilun6 surfcalc  bubblepack ratio 0.30 distance 140
+clump template create geometry  chilun7 surfcalc  bubblepack ratio 0.30 distance 140
+clump template create geometry  chilun8 surfcalc  bubblepack ratio 0.30 distance 140
+clump template create geometry  chilun9  surfcalc bubblepack ratio 0.30 distance 140
+clump template create geometry  chilun10 surfcalc bubblepack ratio 0.30 distance 140
+clump template create geometry  chilun11 surfcalc bubblepack ratio 0.30 distance 140
+clump template create geometry  chilun12 surfcalc bubblepack ratio 0.30 distance 140
+clump template create geometry  chilun13 surfcalc bubblepack ratio 0.30 distance 140
+clump template create geometry  chilun14 surfcalc bubblepack ratio 0.30 distance 140
+clump template create geometry  chilun15 surfcalc bubblepack ratio 0.30 distance 140
+clump template create geometry  chilun16 surfcalc bubblepack ratio 0.30 distance 140
+clump template create geometry  chilun17 surfcalc bubblepack ratio 0.30 distance 140
+clump template create geometry  chilun18 surfcalc bubblepack ratio 0.30 distance 140
+clump template create geometry  chilun19 surfcalc bubblepack ratio 0.30 distance 140
+clump template create geometry  chilun20 surfcalc bubblepack ratio 0.30 distance 140
+clump template create geometry  chilun21 surfcalc bubblepack ratio 0.30 distance 140
+clump template create geometry  chilun22 surfcalc bubblepack ratio 0.30 distance 140
+
+clump replicate name chilun1 origposition   id 1
+clump replicate name chilun2 origposition   id 2
+clump replicate name chilun3 origposition   id 3
+clump replicate name chilun4 origposition   id 4
+clump replicate name chilun5 origposition   id 5
+clump replicate name chilun6 origposition   id 6
+clump replicate name chilun7 origposition   id 7
+clump replicate name chilun8 origposition   id 8
+clump replicate name chilun9  origposition  id 9 
+clump replicate name chilun10 origposition  id 10
+clump replicate name chilun11 origposition  id 11
+clump replicate name chilun12 origposition  id 12
+clump replicate name chilun13 origposition  id 13
+clump replicate name chilun14 origposition  id 14
+clump replicate name chilun15 origposition  id 15
+clump replicate name chilun16 origposition  id 16
+clump replicate name chilun17 origposition  id 17
+clump replicate name chilun18 origposition  id 18
+clump replicate name chilun19 origposition  id 19
+clump replicate name chilun20 origposition  id 20
+clump replicate name chilun21 origposition  id 21
+clump replicate name chilun22 origposition  id 22
+;===================================================================================
+;The code from line 50 to line 94 generates upper corrugated plate based on clumps.
+
+cmat default model linear property kn 1e8 ks 1e8 fric 0.25                ;Set all contact models as "linear model" and set contact parameters.
+cmat apply
+cmat default model linear property kn 1e7 ks 1e7 fric 0.25 type ball-ball ;Set "ball-ball" contact models as "linear model" and set contact parameters.
+cmat apply
+
+ball attribute density 3000 damp 0.7
+clump attribute density 3000                                              ;Set the density and damping of balls and clumps.
+
+clump fix xvelocity
+clump fix yvelocity
+clump fix spin
+
+cyc 2000 calm 100
+solve ar 1e-5
+
+save ini_sample
+call Servo

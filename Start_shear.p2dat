@@ -1,0 +1,143 @@
+res servo_add
+
+ball attribute  damp 0.01
+
+clump free yvelocity
+clump free xvelocity
+clump free spin             ;Release the club and start shear
+ 
+wall delete walls range id 2 
+;==============================================================================
+ball attribute  displacement (0,0)
+ball attribute  spin          0  
+ball attribute  rotation      0 
+
+ball attribute  velocity     (0,0)
+ball attribute contactforce multiply 0.0 contactmoment multiply 0.0 
+calm
+
+wall attribute  spin           0  
+wall attribute  velocity      (0,0)
+wall attribute  rotation       0 
+
+clump attribute  displacement (0,0)
+clump attribute  spin          0  
+clump attribute  velocity     (0,0)
+clump attribute contactforce multiply 0.0 contactmoment multiply 0.0 
+calm
+;==============================================================================
+;The code from line 11 to line 27 is used to reset the displacement, velocity, rotation,force, and contactmoment of all entities in the entire model to zero.
+
+;==============================================================================
+[cp_1    = clump.find(1)]
+[cp_2    = clump.find(2)]
+[cp_3    = clump.find(3)]
+[cp_4    = clump.find(4)]
+[cp_5    = clump.find(5)]
+[cp_6    = clump.find(6)]
+[cp_7    = clump.find(7)]
+[cp_8    = clump.find(8)]
+[cp_9    = clump.find(9 )]
+[cp_10   = clump.find(10)]
+[cp_11   = clump.find(11)]
+[cp_12   = clump.find(12)]
+[cp_13   = clump.find(13)]
+[cp_14   = clump.find(14)]
+[cp_15   = clump.find(15)]
+[cp_16   = clump.find(16)]
+[cp_17   = clump.find(17)]
+[cp_18   = clump.find(18)]
+[cp_19   = clump.find(19)]
+[cp_20   = clump.find(20)]
+[cp_21   = clump.find(21)]
+[cp_22   = clump.find(22)]
+
+[clump.vel.x(cp_1)=shear_vel]
+[clump.vel.x(cp_2)=shear_vel]
+[clump.vel.x(cp_3)=shear_vel]
+[clump.vel.x(cp_4)=shear_vel]
+[clump.vel.x(cp_5)=shear_vel]
+[clump.vel.x(cp_6)=shear_vel]
+[clump.vel.x(cp_7)=shear_vel]
+[clump.vel.x(cp_8)=shear_vel]
+[clump.vel.x(cp_9)=shear_vel]
+[clump.vel.x(cp_10)=shear_vel]
+[clump.vel.x(cp_11)=shear_vel]
+[clump.vel.x(cp_12)=shear_vel]
+[clump.vel.x(cp_13)=shear_vel]
+[clump.vel.x(cp_14)=shear_vel]
+[clump.vel.x(cp_15)=shear_vel]
+[clump.vel.x(cp_16)=shear_vel]
+[clump.vel.x(cp_17)=shear_vel]
+[clump.vel.x(cp_18)=shear_vel]
+[clump.vel.x(cp_19)=shear_vel]
+[clump.vel.x(cp_20)=shear_vel]
+[clump.vel.x(cp_21)=shear_vel]
+[clump.vel.x(cp_22)=shear_vel]
+
+clump fix yvelocity
+clump fix spin
+
+clump fix xvelocity range name chilun1
+clump fix xvelocity range name chilun2
+clump fix xvelocity range name chilun3
+clump fix xvelocity range name chilun4
+clump fix xvelocity range name chilun5
+clump fix xvelocity range name chilun6
+clump fix xvelocity range name chilun7
+clump fix xvelocity range name chilun8
+clump fix xvelocity range name chilun9
+clump fix xvelocity range name chilun10
+clump fix xvelocity range name chilun11
+clump fix xvelocity range name chilun12
+clump fix xvelocity range name chilun13
+clump fix xvelocity range name chilun14
+clump fix xvelocity range name chilun15
+clump fix xvelocity range name chilun16
+clump fix xvelocity range name chilun17
+clump fix xvelocity range name chilun18
+clump fix xvelocity range name chilun19
+clump fix xvelocity range name chilun20
+clump fix xvelocity range name chilun21
+clump fix xvelocity range name chilun22
+;==============================================================================
+;The code from line 32 to line 102 is used to assign a constant velocity to the upper corrugated plate.
+
+def  ShearStress
+shear_force =   (wall.force.contact.x(wp_down)) 
+ShearStress=shear_force*2.0/(11.0*rate) ;The variable "ShearStress" represents shear stress in this code.
+end
+
+
+def real_time0_fun
+    real_time0=mech.age
+end
+@real_time0_fun
+
+def real_time
+    real_time=mech.age-real_time0                 ;The variable "real_time" represents the shear time in this code, and the unit is "s".
+end
+
+def height   
+    height=-wall.pos.y(wp_down)+clump.pos.y(cp_1) ;The variable "height" represents the height of the shear band in this code.
+end
+
+def eff
+ eff=ShearStress/nomal_stress*1.0                 ;The variable "eff" represents the effective friction coefficient of the shear band in this code
+end
+
+[n=1000]
+hist delete
+history nstep  [n]
+history add id 1  fish @real_time
+history add id 2  fish @nomal_stress
+history add id 3  fish @ShearStress
+history add id 4  fish @eff
+
+[solve_time = 1.1*rate/(shear_vel*1.0)]
+
+solve time [solve_time]
+
+save  'result'
+
+hist write s 5  4 vs 1  file  'effective_friction.txt'  truncate ;This line of code will output the result file in the folder where the project is located, and the file name is 'effective_friction.txt'.

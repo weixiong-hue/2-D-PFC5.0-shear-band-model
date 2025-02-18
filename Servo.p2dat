@@ -1,0 +1,92 @@
+res ini_sample
+;==============================================================================
+def range_fish2(pos,cp)
+     range_fish2 = false
+         if type.pointer(cp)='ball-facet' then
+         bp1 = contact.end1(cp)
+         fp = contact.end2(cp)
+         wp = wall.facet.wall(fp)
+             if ball.group(bp1)='down' then
+                if wall.group(wp)='chilun_down' then  
+                    range_fish2 = true
+                endif
+             endif
+         endif
+end
+
+contact property  fric 0.9  range fish @range_fish2
+
+def range_fish3(pos,cp)
+     range_fish3 = false
+         if type.pointer(cp)='ball-pebble' then
+                    range_fish3 = true
+         endif
+end
+
+
+contact property  fric 0.9  range fish @range_fish3
+
+;==============================================================================
+;The code from line 3 to line 26 sets the friction coefficient between the ball and the wall, as well as between the ball and the clump, to 0.9.
+
+
+
+;==============================================================================
+[wp_down = wall.find(1)]
+
+def compute_stress
+nomal_force =  -(wall.force.contact.y(wp_down))
+nomal_stress=nomal_force/(11.0*rate) ;The variable "nomal_stress" represents confining pressure in this code.
+end
+
+set fish callback -1.0 @compute_stress
+
+[sevro_factor=0.1]
+[do_zSevro=true]
+
+[sevro_freq=100]
+[timestepNow=global.step-1]
+def sevro_clumps
+    if timestepNow<global.step then
+        get_g(sevro_factor)
+        timestepNow+=sevro_freq
+    endif
+    
+    if do_zSevro=true then
+        Zvel=gz*(-nomal_stress+tzz)
+        wall.vel.y(wp_down)   =     Zvel
+    endif
+end
+
+
+def get_g(fac)
+    gz=0.0
+    zongKNZ=0.0
+       loop foreach ct wall.contactmap(wp_down)
+        zongKNZ+=contact.prop(ct,"kn")
+       endloop
+    gz=fac*((11.00*rate)/(zongKNZ*global.timestep))
+end
+cyc 1000
+
+set fish callback -1.0 @sevro_clumps
+
+[tol=1e-3]
+define stop_me
+   aratio = mech.solve("aratio")
+    if math.abs((nomal_stress-tzz)/tzz)>tol
+        exit
+    endif
+    if aratio>1e-4
+        exit
+    endif
+    stop_me=1
+end
+
+solve fishhalt @stop_me  
+;==============================================================================
+;The code from line 3 to line 26 is used to implement servo function, ensuring that the shear band model is under constant confining pressure.
+
+save servo_add
+
+call Start_shear

@@ -1,0 +1,17 @@
+
+; modelname: 2-D-PFC5.0-shear-band-model
+; This code is used to generate raw data for the paper "Effect of Particle Size on Stick-Slip Dynamics of Shear Bands Considering Randomness of Initial Particle Positions in Discrete Element Modeling"
+;==============================================================================
+
+
+
+new
+[random_seed=10001]  ;Set random seeds, different random seeds can result in different initial particle positions.
+[a=1.0*2^3]          ;Set the normalized particle size, and the value could range from 2e-6 to 2e0.
+[tzz=1.0e6]          ;Target confining pressure, in this code, it could be set from 0.5e6 to 2.0e6. And the unit is "Pa".
+[shear_vel=1200e-6]  ;Shear velocity, the unit is "m/s".
+call Create_sample   ;Call the corresponding calculation file.
+
+
+
+
